@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine Times</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main newspaper container - HIDDEN BY DEFAULT -->
+    <div class="newspaper-container" style="display: none;">
+        <div class="header-bg">
+            <h1>Valentine Times</h1>
+            <div class="header-subtitle">The Finest News West of the West</div>
+        </div>
+        
+        <div class="book">
+            <div class="page-container" id="page-container">
+                <!-- Pages will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button id="prev-page">Previous</button>
+            <span id="page-number">No Pages</span>
+            <button id="next-page">Next</button>
+        </div>
+        
+        <button id="submit-btn">Submit Your News</button>
+        
+        <div class="submit-form" id="submit-form" style="display: none;">
+            <input type="text" id="headline" placeholder="Your Headline Here" maxlength="255">
+            <textarea id="content" placeholder="Tell the story..." maxlength="1000"></textarea>
+            <button id="submit-news">Publish to the Press</button>
+            <button id="cancel-submit">Back to the Saloon</button>
+        </div>
+    </div>
+
+    <!-- Full article modal - HIDDEN BY DEFAULT -->
+    <div class="full-article-modal" id="full-article-modal" style="display: none;">
+        <div class="full-article-content">
+            <h2 id="full-article-headline">No Title</h2>
+            <p id="full-article-text">No Content</p>
+            <button id="close-full-article">Close</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

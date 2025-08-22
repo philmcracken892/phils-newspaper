@@ -1,0 +1,477 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=IM+Fell+English:ital@0;1&display=swap');
+
+/* Global Variables for Wild West Theme */
+:root {
+    --sepia-bg: #f4e9d8; /* Aged paper background */
+    --dark-sepia: #d9c8a5; /* Faded sepia for gradients */
+    --ink-black: #1a1a1a; /* Dark ink for text */
+    --rust-brown: #6b3e2e; /* Rusty brown for accents */
+    --faded-red: #8b2f2f; /* Faded red for buttons */
+    --shadow-ink: rgba(0, 0, 0, 0.5); /* Subtle shadow */
+    --paper-texture: url('https://www.transparenttextures.com/patterns/crumbled-paper.png'); /* Distressed paper texture */
+    --ink-smudge: url('https://www.transparenttextures.com/patterns/grunge.png'); /* Ink smudge overlay */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--sepia-bg);
+    border: 1px solid var(--ink-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--rust-brown);
+    border: 1px solid var(--ink-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--faded-red);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent; /* Ensure no background on startup */
+    overflow: hidden;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'IM Fell English', serif;
+}
+
+/* Remove body pseudo-elements to prevent background issues */
+body::before {
+    content: none;
+}
+
+
+
+/* Main Container with Aged Paper Look */
+.newspaper-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    max-width: 900px;
+    padding: 25px;
+    background: var(--sepia-bg) var(--paper-texture);
+    border: 4px double var(--ink-black);
+    border-radius: 8px;
+    box-shadow: 
+        0 15px 25px var(--shadow-ink),
+        inset 0 0 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none; /* Reinforce hidden state */
+    background-image: var(--paper-texture), var(--ink-smudge);
+    background-blend-mode: overlay;
+}
+
+/* Ensure active class only shows container */
+.newspaper-container.active {
+    display: block;
+}
+
+/* Decorative Corner Elements with Distressed Look */
+.newspaper-container::before,
+.newspaper-container::after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: var(--rust-brown);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    opacity: 0.8;
+}
+
+.newspaper-container::before {
+    top: -4px;
+    left: -4px;
+}
+
+.newspaper-container::after {
+    bottom: -4px;
+    right: -4px;
+    transform: rotate(180deg);
+}
+
+/* Header with Bold, Typewriter Typography */
+.header-bg {
+    background: var(--ink-grey);
+    padding: 20px;
+    text-align: center;
+    border: 3px solid var(--rust-brown);
+    border-radius: 5px;
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+    background-image: var(--ink-smudge);
+    background-blend-mode: multiply;
+}
+
+.header-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--faded-red), transparent);
+}
+
+h1 {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(38px, 6vw, 50px);
+    font-weight: 700;
+    color: var(--ink-black);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.header-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--rust-brown);
+    margin-top: 10px;
+}
+
+/* Book/Page System */
+.book {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    margin: 25px 0;
+}
+
+.page-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.page {
+    width: 100%;
+    min-height: 350px;
+    background: var(--sepia-bg) var(--paper-texture);
+    border: 2px solid var(--ink-black);
+    border-radius: 5px;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.5s ease;
+    overflow-y: auto;
+    box-sizing: border-box;
+    box-shadow: 0 8px 20px var(--shadow-ink);
+    background-image: var(--paper-texture), var(--ink-smudge);
+    background-blend-mode: overlay;
+}
+
+.page.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.page.active {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 1;
+}
+
+.page h2 {
+    font-family: 'Special Elite', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink-black);
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--rust-brown);
+    position: relative;
+}
+
+.page h2::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--faded-red), transparent);
+}
+
+.page p {
+    font-family: 'IM Fell English', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-black);
+    margin: 0 0 20px 0;
+    text-align: justify;
+}
+
+/* Enhanced Buttons with Western Flair */
+.page button,
+#submit-btn,
+.submit-form button {
+    background: var(--ink-black);
+    color: var(--sepia-bg);
+    border: 2px solid var(--rust-brown);
+    padding: 12px 25px;
+    font-family: 'Special Elite', cursive;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.page button::before,
+#submit-btn::before,
+.submit-form button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139, 47, 47, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.page button:hover::before,
+#submit-btn:hover::before,
+.submit-form button:hover::before {
+    left: 100%;
+}
+
+.page button:hover,
+#submit-btn:hover,
+.submit-form button:hover {
+    background: var(--faded-red);
+    color: var(--sepia-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--shadow-ink);
+}
+
+/* Navigation with Ornate Dividers */
+.navigation {
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+}
+
+.navigation::before,
+.navigation::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rust-brown), transparent);
+}
+
+.navigation::before { left: 15%; }
+.navigation::after { right: 15%; }
+
+#page-number {
+    font-family: 'IM Fell English', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--ink-black);
+    background: var(--dark-sepia);
+    padding: 8px 20px;
+    border-radius: 5px;
+    border: 1px solid var(--rust-brown);
+    display: inline-block;
+}
+
+/* Enhanced Forms */
+.submit-form {
+    margin-top: 25px;
+    padding: 20px;
+    background: var(--dark-sepia) var(--paper-texture);
+    border: 2px solid var(--ink-black);
+    border-radius: 5px;
+    display: none; /* Reinforce hidden state */
+    background-image: var(--ink-smudge);
+    background-blend-mode: overlay;
+}
+
+.submit-form input,
+.submit-form textarea {
+    width: 100%;
+    margin: 15px 0;
+    padding: 15px;
+    font-family: 'IM Fell English', serif;
+    font-size: 16px;
+    background: var(--sepia-bg);
+    border: 2px solid var(--ink-black);
+    border-radius: 5px;
+    color: var(--ink-black);
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.submit-form input:focus,
+.submit-form textarea:focus {
+    outline: none;
+    border-color: var(--faded-red);
+    box-shadow: 0 0 15px rgba(139, 47, 47, 0.3);
+}
+
+.submit-form textarea {
+    height: 120px;
+    resize: none;
+}
+
+/* Article Preview with Weathered Look */
+.article-preview {
+    cursor: pointer;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid var(--rust-brown);
+    background: var(--dark-sepia) var(--paper-texture);
+    transition: all 0.3s ease;
+    background-image: var(--ink-smudge);
+    background-blend-mode: overlay;
+}
+
+.article-preview:hover {
+    background: var(--faded-red);
+    color: var(--sepia-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px var(--shadow-ink);
+}
+
+/* Modal with Aged Paper */
+.full-article-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none; /* Reinforce hidden state */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.full-article-content {
+    width: 85%;
+    max-width: 900px;
+    padding: 35px;
+    background: var(--sepia-bg) var(--paper-texture);
+    border: 4px double var(--ink-black);
+    border-radius: 8px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    box-shadow: 0 20px 40px var(--shadow-ink);
+    background-image: var(--ink-smudge);
+    background-blend-mode: overlay;
+}
+
+.full-article-content h2 {
+    font-family: 'Special Elite', cursive;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink-black);
+    margin: 0 0 20px 0;
+    text-align: center;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--rust-brown);
+}
+
+.full-article-content p {
+    font-family: 'IM Fell English', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--ink-black);
+    margin: 0 0 20px 0;
+    text-align: justify;
+}
+
+.full-article-image {
+    max-width: 100%;
+    max-height: 350px;
+    width: auto;
+    height: auto;
+    margin: 20px auto;
+    border: 3px solid var(--ink-black);
+    border-radius: 5px;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 20px var(--shadow-ink);
+}
+
+.full-article-image:hover {
+    transform: scale(1.03);
+}
+
+#close-full-article {
+    background: var(--ink-grey);
+    color: var(--sepia-bg);
+    border: 2px solid var(--rust-brown);
+    padding: 15px 30px;
+    font-family: 'Special Elite', cursive;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+    margin: 25px auto 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#close-full-article:hover {
+    background: var(--faded-red);
+    color: var(--sepia-bg);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px var(--shadow-ink);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .newspaper-container {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 34px;
+    }
+    
+    .page {
+        padding: 15px;
+        min-height: 300px;
+    }
+    
+    .full-article-content {
+        width: 95%;
+        padding: 25px;
+    }
+}
+
+/* Subtle Animation for Dynamic Content */
+@keyframes contentLoad {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.dynamic-content {
+    animation: contentLoad 0.6s ease-out;
+}
