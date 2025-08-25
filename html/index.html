@@ -5,6 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valentine Times</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Compressed styles for smaller interface */
+        .newspaper-container {
+            width: 70% !important;
+            max-width: 650px !important;
+            padding: 15px !important;
+        }
+        
+        .header-bg {
+            padding: 12px !important;
+            margin-bottom: 15px !important;
+        }
+        
+        h1 {
+            font-size: clamp(24px, 4vw, 32px) !important;
+            letter-spacing: 2px !important;
+            margin: 0 !important;
+        }
+        
+        .header-subtitle {
+            font-size: 14px !important;
+            margin-top: 5px !important;
+        }
+        
+        .book {
+            min-height: 250px !important;
+            margin: 15px 0 !important;
+        }
+        
+        .page {
+            min-height: 220px !important;
+            padding: 12px !important;
+            font-size: 14px !important;
+        }
+        
+        .page h2 {
+            font-size: 18px !important;
+            margin: 0 0 8px 0 !important;
+            padding-bottom: 6px !important;
+        }
+        
+        .page p {
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+            margin: 0 0 10px 0 !important;
+        }
+        
+        .article-image-preview {
+            margin: 6px 0 !important;
+        }
+        
+        .article-image-preview img {
+            max-width: 120px !important;
+            max-height: 90px !important;
+        }
+        
+        .article-meta, .article-date {
+            font-size: 11px !important;
+            margin-top: 4px !important;
+        }
+        
+        .navigation {
+            padding: 12px 0 !important;
+        }
+        
+        #page-number {
+            font-size: 13px !important;
+            padding: 4px 12px !important;
+        }
+        
+        .page button, #submit-btn, .submit-form button {
+            padding: 6px 12px !important;
+            font-size: 11px !important;
+            letter-spacing: 1px !important;
+        }
+        
+        .delete-btn {
+            padding: 3px 8px !important;
+            font-size: 10px !important;
+            margin-top: 5px !important;
+        }
+        
+        .submit-form {
+            margin-top: 12px !important;
+            padding: 12px !important;
+        }
+        
+        .submit-form input, .submit-form textarea {
+            margin: 8px 0 !important;
+            padding: 8px !important;
+            font-size: 13px !important;
+        }
+        
+        .submit-form textarea {
+            height: 80px !important;
+        }
+        
+        .url-help {
+            font-size: 10px !important;
+            margin-top: 2px !important;
+        }
+        
+        .article-preview {
+            padding: 8px !important;
+            margin: 5px 0 !important;
+        }
+        
+        /* Compressed modal for full articles */
+        .full-article-content {
+            width: 75% !important;
+            max-width: 600px !important;
+            padding: 20px !important;
+            max-height: 80vh !important;
+        }
+        
+        .full-article-content h2 {
+            font-size: 22px !important;
+            margin-bottom: 12px !important;
+        }
+        
+        .full-article-content p {
+            font-size: 15px !important;
+            line-height: 1.5 !important;
+        }
+        
+        #full-article-image {
+            max-height: 200px !important;
+            margin: 10px auto !important;
+        }
+        
+        #close-full-article {
+            padding: 8px 16px !important;
+            font-size: 12px !important;
+            margin: 15px auto 0 !important;
+        }
+        
+        /* Mobile adjustments for compressed view */
+        @media (max-width: 768px) {
+            .newspaper-container {
+                width: 90% !important;
+                max-width: 500px !important;
+                padding: 10px !important;
+            }
+            
+            h1 {
+                font-size: 20px !important;
+            }
+            
+            .page {
+                min-height: 180px !important;
+                padding: 8px !important;
+            }
+            
+            .full-article-content {
+                width: 90% !important;
+                padding: 15px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Main newspaper container - HIDDEN BY DEFAULT -->
@@ -28,23 +187,31 @@
         
         <button id="submit-btn">Submit Your News</button>
         
+        <!-- COMPRESSED: Submit form with image URL support -->
         <div class="submit-form" id="submit-form" style="display: none;">
             <input type="text" id="headline" placeholder="Your Headline Here" maxlength="255">
             <textarea id="content" placeholder="Tell the story..." maxlength="1000"></textarea>
+            <!-- Image URL input field -->
+            <input type="url" id="image-url" placeholder="Image URL (optional)" maxlength="500">
+            <div class="url-help">
+                Tip: Use Discord image links or .jpg, .png, .gif files
+            </div>
             <button id="submit-news">Publish to the Press</button>
             <button id="cancel-submit">Back to the Saloon</button>
         </div>
     </div>
-
-    <!-- Full article modal - HIDDEN BY DEFAULT -->
+    
+    <!-- COMPRESSED: Full article modal with image support -->
     <div class="full-article-modal" id="full-article-modal" style="display: none;">
         <div class="full-article-content">
             <h2 id="full-article-headline">No Title</h2>
+            <!-- Image display in full article view -->
+            <img id="full-article-image" style="display: none;" alt="Article Image">
             <p id="full-article-text">No Content</p>
             <button id="close-full-article">Close</button>
         </div>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
