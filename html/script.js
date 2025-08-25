@@ -1,10 +1,11 @@
+// SCRIPT.JS - Enhanced Valentine Times JavaScript with Image Support
+
 let currentPage = 0;
 let isNewspaperOpen = false;
 let isPageLoaded = false;
 
 // Ensure UI is hidden on load
 document.addEventListener('DOMContentLoaded', function() {
-    
     const container = document.querySelector('.newspaper-container');
     const modal = document.getElementById('full-article-modal');
     
@@ -19,13 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.classList.remove('newspaper-active');
     
     isNewspaperOpen = false;
-    
-    
 });
 
 // Reinforce hidden state after full page load
 window.addEventListener('load', () => {
-   
     const container = document.querySelector('.newspaper-container');
     const modal = document.getElementById('full-article-modal');
     if (container) {
@@ -37,14 +35,32 @@ window.addEventListener('load', () => {
     }
     document.body.classList.remove('newspaper-active');
     isPageLoaded = true;
-   
-    
 });
+
+// Function to validate image URLs (from posters resource)
+function IsValidImageURL(url) {
+    if (!url || url === "") {
+        return false;
+    }
+    if (!url.match(/^https?:\/\//)) {
+        return false;
+    }
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+    const isDiscordCDN = url.match(/cdn\.discordapp\.com/) || url.match(/media\.discordapp\.net/);
+    if (isDiscordCDN) {
+        return true;
+    }
+    for (const ext of imageExtensions) {
+        if (url.toLowerCase().includes(ext)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 window.addEventListener('message', (event) => {
     // Delay processing until page is fully loaded
     if (!isPageLoaded) {
-        
         return;
     }
     
@@ -52,14 +68,10 @@ window.addEventListener('message', (event) => {
     const container = document.querySelector('.newspaper-container');
     
     if (!container) {
-        
         return;
     }
     
-    
-    
     if (data.type === 'openNewspaper') {
-        
         isNewspaperOpen = true;
         
         // Add background effects
@@ -72,7 +84,6 @@ window.addEventListener('message', (event) => {
         updatePageDisplay();
         
     } else if (data.type === 'updateArticles') {
-        
         // Only update if newspaper is currently open
         if (isNewspaperOpen && data.articles && data.articles.length > 0) {
             updateArticles(data.articles);
@@ -80,7 +91,6 @@ window.addEventListener('message', (event) => {
         }
         
     } else if (data.type === 'hideNewspaper') {
-       
         isNewspaperOpen = false;
         
         // Remove background effects
@@ -96,6 +106,7 @@ window.addEventListener('message', (event) => {
     }
 });
 
+// ENHANCED: Update articles with image support
 function updateArticles(articles) {
     const pageContainer = document.getElementById('page-container');
     if (!pageContainer) return;
@@ -116,28 +127,69 @@ function updateArticles(articles) {
             // Safely escape quotes and newlines
             const safeHeadline = (article.headline || '').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
             const safeContent = (article.content || '').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+            const safeImageUrl = (article.image_url || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
             
-            div.innerHTML = `
-                <div class="article-preview" onclick="showFullArticle('${safeHeadline}', '${safeContent}', ${article.id})">
-                    <h2>${article.headline || 'No Title'}</h2>
-                    <p>${(article.content || '').substring(0, 100)}...</p>
+            // Create article preview with image support
+            let articleHTML = `
+                <div class="article-preview" onclick="showFullArticle('${safeHeadline}', '${safeContent}', ${article.id}, '${safeImageUrl}')">
+                    <h2>${article.headline || 'No Title'}</h2>`;
+            
+            // Add image preview if available
+            if (article.image_url && IsValidImageURL(article.image_url)) {
+                articleHTML += `
+                    <div class="article-image-preview">
+                        <img src="${article.image_url}" alt="Article Image" onerror="this.style.display='none'">
+                    </div>`;
+            }
+            
+            articleHTML += `
+                    <p>${(article.content || '').substring(0, 100)}...</p>`;
+            
+            // Add author and date info if available
+            if (article.author_name) {
+                articleHTML += `<div class="article-meta">By: ${article.author_name}</div>`;
+            }
+            if (article.submitted_at) {
+                const date = new Date(article.submitted_at);
+                articleHTML += `<div class="article-date">${date.toLocaleDateString()}</div>`;
+            }
+            
+            articleHTML += `
                 </div>
-                <button onclick="deleteArticle(${article.id})">Delete</button>
+                <button onclick="deleteArticle(${article.id})" class="delete-btn">Delete</button>
             `;
+            
+            div.innerHTML = articleHTML;
             pageContainer.appendChild(div);
         });
     }
     updateNavigationButtons(safeArticles.length);
 }
 
-function showFullArticle(headline, content, id) {
+// ENHANCED: Show full article with image support
+function showFullArticle(headline, content, id, imageUrl) {
     const modal = document.getElementById('full-article-modal');
     const headlineEl = document.getElementById('full-article-headline');
     const textEl = document.getElementById('full-article-text');
+    const imageEl = document.getElementById('full-article-image');
     
     if (modal && headlineEl && textEl) {
         headlineEl.textContent = headline || 'No Title';
         textEl.textContent = content || 'No Content';
+        
+        // Handle image display
+        if (imageEl) {
+            if (imageUrl && IsValidImageURL(imageUrl)) {
+                imageEl.src = imageUrl;
+                imageEl.style.display = 'block';
+                imageEl.onerror = function() {
+                    this.style.display = 'none';
+                };
+            } else {
+                imageEl.style.display = 'none';
+            }
+        }
+        
         modal.style.display = 'flex';
     }
 }
@@ -204,7 +256,6 @@ function closeNewspaper() {
     }
     
     isNewspaperOpen = false;
-    
 }
 
 // Event listeners with null checks
@@ -243,12 +294,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Submit news button
+    // ENHANCED: Submit news button with image URL support
     const submitNewsBtn = document.getElementById('submit-news');
     if (submitNewsBtn) {
         submitNewsBtn.addEventListener('click', () => {
             const headline = document.getElementById('headline')?.value;
             const content = document.getElementById('content')?.value;
+            const imageUrl = document.getElementById('image-url')?.value; // NEW: Get image URL
+            
+            // Validate image URL if provided
+            if (imageUrl && imageUrl.trim() !== '') {
+                if (!IsValidImageURL(imageUrl)) {
+                    alert('Please provide a valid image URL (jpg, png, gif, etc.) or leave blank');
+                    return;
+                }
+            }
             
             if (headline && content && typeof GetParentResourceName === 'function') {
                 fetch(`https://${GetParentResourceName()}/submitNews`, {
@@ -256,17 +316,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ headline, content })
+                    body: JSON.stringify({ 
+                        headline, 
+                        content,
+                        imageUrl: imageUrl || null // NEW: Include image URL
+                    })
                 }).catch(err => console.error('Submit news error:', err));
                 
                 // Clear form and hide it
                 const form = document.getElementById('submit-form');
                 const headlineInput = document.getElementById('headline');
                 const contentInput = document.getElementById('content');
+                const imageUrlInput = document.getElementById('image-url'); // NEW: Clear image URL field
                 
                 if (form) form.style.display = 'none';
                 if (headlineInput) headlineInput.value = '';
                 if (contentInput) contentInput.value = '';
+                if (imageUrlInput) imageUrlInput.value = ''; // NEW: Clear image URL field
             }
         });
     }
@@ -300,4 +366,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
