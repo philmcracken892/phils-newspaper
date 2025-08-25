@@ -9,37 +9,65 @@ local NoticeConfig = {
     NoticeUrlMaxLength = 255,
 }
 
+-- Function to validate if a URL is a valid image URL (from posters resource)
+local function IsValidImageURL(url)
+    if not url or url == "" then
+        return false
+    end
+    -- Check if it's a valid URL format
+    if not string.match(url, "^https?://") then
+        return false
+    end
+    -- Check for common image file extensions or Discord CDN
+    local imageExtensions = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"}
+    local isDiscordCDN = string.match(url, "cdn%.discordapp%.com") or string.match(url, "media%.discordapp%.net")
+    if isDiscordCDN then
+        return true
+    end
+    for _, ext in ipairs(imageExtensions) do
+        if string.match(string.lower(url), ext) then
+            return true
+        end
+    end
+    return false
+end
+
+-- ENHANCED: Create newspaper table with image URL support
 local function createNewspaperTable()
     MySQL.query([[
         CREATE TABLE IF NOT EXISTS newspaper_articles (
             id INT AUTO_INCREMENT PRIMARY KEY,
             headline VARCHAR(255) NOT NULL,
             content TEXT NOT NULL,
+            image_url VARCHAR(500) DEFAULT NULL,
+            author_citizenid VARCHAR(50) DEFAULT NULL,
+            author_name VARCHAR(100) DEFAULT NULL,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ]], {}, function(result)
         if result then
-            
+            print("[RSG-Newspaper] Database table created/verified successfully with image support")
         else
-            
+            print("[RSG-Newspaper] ERROR: Failed to create/verify database table")
         end
     end)
 end
 
+-- ENHANCED: Load articles with image URLs
 local function loadNewspaperArticles(callback)
-    MySQL.query('SELECT id, headline, content FROM newspaper_articles ORDER BY submitted_at DESC', {}, function(result)
+    MySQL.query('SELECT id, headline, content, image_url, author_name, submitted_at FROM newspaper_articles ORDER BY submitted_at DESC', {}, function(result)
         if result and #result > 0 then
-            
+            print("[RSG-Newspaper] Loaded " .. #result .. " articles")
             callback(result)
         else
-            
+            print("[RSG-Newspaper] No articles found")
             callback({})
         end
     end)
 end
 
--- Helper function to create notice board poster
-local function createNoticeBoardPoster(citizenid, headline, content, articleId)
+-- ENHANCED: Helper function to create notice board poster with image support
+local function createNoticeBoardPoster(citizenid, headline, content, articleId, imageUrl)
     -- Truncate content if too long for notice board
     local truncatedContent = content
     if #content > NoticeConfig.NoticeDescMaxLength then
@@ -56,12 +84,15 @@ local function createNoticeBoardPoster(citizenid, headline, content, articleId)
     local posterTitle = "[NEWS] " .. truncatedHeadline
     local posterDescription = "Breaking News from The Glounge Times:\n\n" .. truncatedContent .. "\n\n[Article ID: " .. articleId .. "]"
     
+    -- Include image URL in the notice board if available
+    local noticeUrl = imageUrl and imageUrl ~= "" and imageUrl or nil
+    
     -- Insert into notice board database
     exports.oxmysql:insert('INSERT INTO ' .. NoticeConfig.DatabaseName .. ' (citizenid, title, description, url, created_at) VALUES (?, ?, ?, ?, ?)', {
         citizenid,
         posterTitle,
         posterDescription,
-        nil, -- No URL for newspaper posters
+        noticeUrl,
         os.date('%Y-%m-%d %H:%M:%S')
     }, function(result)
         if result and result > 0 then
@@ -82,18 +113,17 @@ RegisterNetEvent("rsg-newspaper:getArticles")
 AddEventHandler("rsg-newspaper:getArticles", function()
     local src = source
     loadNewspaperArticles(function(articles)
-        
         TriggerClientEvent("rsg-newspaper:loadArticles", src, articles)
     end)
 end)
 
+-- ENHANCED: Submit news with image URL support
 RegisterNetEvent("rsg-newspaper:submitNews")
-AddEventHandler("rsg-newspaper:submitNews", function(headline, content)
+AddEventHandler("rsg-newspaper:submitNews", function(headline, content, imageUrl)
     local src = source
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    
     if Player.PlayerData.job.name ~= "reporter" and Player.PlayerData.job.name ~= "lawyer" then
         TriggerClientEvent('ox_lib:notify', src, {
             title = 'Permission Denied',
@@ -103,11 +133,30 @@ AddEventHandler("rsg-newspaper:submitNews", function(headline, content)
         return
     end
 
+    -- Validate image URL if provided
+    if imageUrl and imageUrl ~= "" then
+        if not IsValidImageURL(imageUrl) then
+            TriggerClientEvent('ox_lib:notify', src, {
+                title = 'Invalid Image URL',
+                description = 'Please provide a valid image URL (jpg, png, gif, etc.) or leave blank',
+                type = 'error'
+            })
+            return
+        end
+    end
+
     if headline and content and #headline > 0 and #content > 0 then
-        MySQL.insert('INSERT INTO newspaper_articles (headline, content) VALUES (?, ?)', {headline, content}, function(insertId)
+        -- Insert with image URL support
+        MySQL.insert('INSERT INTO newspaper_articles (headline, content, image_url, author_citizenid, author_name) VALUES (?, ?, ?, ?, ?)', {
+            headline, 
+            content, 
+            imageUrl, 
+            Player.PlayerData.citizenid, 
+            Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
+        }, function(insertId)
             if insertId then
                 -- Create notice board poster after successful article creation
-                createNoticeBoardPoster(Player.PlayerData.citizenid, headline, content, insertId)
+                createNoticeBoardPoster(Player.PlayerData.citizenid, headline, content, insertId, imageUrl)
                 
                 loadNewspaperArticles(function(articles)
                     if #articles > 0 then
@@ -136,7 +185,6 @@ AddEventHandler("rsg-newspaper:deleteArticle", function(articleId)
     local Player = RSGCore.Functions.GetPlayer(src)
     if not Player then return end
 
-    
     if Player.PlayerData.job.name ~= "reporter" and Player.PlayerData.job.name ~= "lawyer" then
         TriggerClientEvent('ox_lib:notify', src, {
             title = 'Permission Denied',
@@ -186,7 +234,6 @@ AddEventHandler('playerConnecting', function()
         if #articles > 0 then
             TriggerClientEvent("rsg-newspaper:updateContent", src, articles)
         end
-        
     end)
 end)
 
@@ -194,6 +241,6 @@ Citizen.CreateThread(function()
     createNewspaperTable()
     Wait(1000)
     loadNewspaperArticles(function(articles)
-        
+        print("[RSG-Newspaper] System initialized with " .. #articles .. " articles")
     end)
 end)
